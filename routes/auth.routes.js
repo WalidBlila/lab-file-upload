@@ -6,8 +6,8 @@ const router = new Router();
 const bcryptjs = require('bcryptjs');
 const saltRounds = 10;
 const User = require('../models/User.model');
+const Post = require('../models/Post.model')
 const mongoose = require('mongoose');
-
 const routeGuard = require('../configs/route-guard.config');
 
 ////////////////////////////////////////////////////////////////////////
@@ -113,4 +113,29 @@ router.get('/userProfile', routeGuard, (req, res) => {
   res.render('users/user-profile');
 });
 
+router.get('/posts/create',(req,res,next)=>{
+  //check if logged in
+  if (!req.session.currentUser){
+    res.redirect('/login')
+    return
+  }
+})
+router.post('/posts/create', fileUploader.single('image'),(req,res,next)=>{
+  if (req.session.currentUser){
+    const {content,picName}=req.body;
+    if (!content) {
+      res.render('posts/post-form', { errorMessage: 'Please provide the content.' });
+      return;
+    }
+    Post.create({
+      content,
+      picName,
+      creatorId: req.session.currentUser._id,
+      picPath: req.file.path
+    })
+    .then(newPost =>{
+      console.log('post newly created',newPost)
+    })
+  }
+})
 module.exports = router;

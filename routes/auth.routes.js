@@ -138,4 +138,23 @@ router.post('/posts/create', fileUploader.single('image'),(req,res,next)=>{
     })
   }
 })
+router.get('/posts',(req,res,next)=>{
+  if (req.session.currentUser){
+    Post.find()
+    .then(postsFromDB=>{
+      res.render('posts/posts-list',{allPosts: postsFromDB})
+    })
+    .catch(err=>next(err))
+  }
+})
+router.get('/posts/:id',(req,res,next)=>{
+  if (req.session.currentUser){
+    const postId = req.params.id;
+    Post.findOne({_id:postId})
+    .then(postFound=>{
+      res.render('posts/post-details',{thePost:postFound})
+    })
+    .catch(err=>next(err));
+  }
+})
 module.exports = router;
